@@ -31,6 +31,21 @@ public class SwipeActivity extends AppCompatActivity {
 
     private String msg;
 
+    private String remove_spaces(String message) {
+        if(message==null)
+            return null;
+        String query = "";
+        for(int i = 0; i<message.length(); i++)
+        {
+            char c = message.charAt(i);
+            if(c==' ')
+                query+="%20";
+            else
+                query+=c;
+        }
+        return query;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,9 +60,11 @@ public class SwipeActivity extends AppCompatActivity {
         msg = intent.getStringExtra(SearchActivity.EXTRA_MESSAGE);
         Log.d("Received msg:", msg);
 
+
         final TextView item_text = (TextView)findViewById(R.id.item_name);
         item_text.setText(msg);
 
+        msg = remove_spaces(msg);
         ImageView img = (ImageView)findViewById(R.id.product_pic);
 
         final FetchFromAPI task = new FetchFromAPI();
@@ -59,12 +76,18 @@ public class SwipeActivity extends AppCompatActivity {
         butt_up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                double id = task.current_ten_items[(task.count-2)%10].itemId;
+                itemVotes.put(id, 1);
+                System.out.println(itemVotes);
                 task.onPostExecute(msg);
             }
         });
         butt_down.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                double id = task.current_ten_items[(task.count-2)%10].itemId;
+                itemVotes.put(id, 0);
+                System.out.println(itemVotes);
                 task.onPostExecute(msg);
             }
         });
@@ -200,7 +223,7 @@ public class SwipeActivity extends AppCompatActivity {
         private ImageView img;
         public void update_product(){
             img = (ImageView)findViewById(R.id.product_pic);
-            final Item i = current_ten_items[count%10];
+            final Item i = current_ten_items[(count-1)%10];
 
             TextView name = (TextView)findViewById(R.id.product_name);
             if(i.name!=null)
@@ -217,6 +240,12 @@ public class SwipeActivity extends AppCompatActivity {
             else
                 desc.setText("No description");
 
+
+            TextView price = (TextView)findViewById(R.id.product_price);
+            if (i.salePrice!=null)
+                price.setText(("$"+i.salePrice + "\n(Sale!)"));
+            else
+            price.setText("$"+i.msrp);
 
             new AsyncTask<Void, Void, Void>() {
                 @Override
@@ -250,6 +279,7 @@ public class SwipeActivity extends AppCompatActivity {
         String categoryPath;
         String shortDescription;
         String msrp;
+        String salePrice;
         String thumbnailImage;
         String addToCartUrl;
         float customerRating;

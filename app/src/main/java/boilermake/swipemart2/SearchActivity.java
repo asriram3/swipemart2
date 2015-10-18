@@ -32,7 +32,23 @@ public class SearchActivity extends AppCompatActivity {
         Intent intent = new Intent(this, SwipeActivity.class);
         EditText editText = (EditText) findViewById(R.id.editText);
         String message = editText.getText().toString();
+//        message = remove_spaces(message);
         intent.putExtra(EXTRA_MESSAGE, message);
         startActivity(intent);
+    }
+
+    private String remove_spaces(String message) {
+        if(message==null)
+            return null;
+        String query = "";
+        for(int i = 0; i<message.length(); i++)
+        {
+            char c = message.charAt(i);
+          if(c==' ')
+              query+="%20";
+          else
+              query+=c;
+        }
+        return query;
     }
 }
