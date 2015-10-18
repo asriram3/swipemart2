@@ -62,6 +62,12 @@ public class SwipeActivity extends AppCompatActivity {
                 task.onPostExecute(msg);
             }
         });
+        butt_down.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                task.onPostExecute(msg);
+            }
+        });
     }
 
     public static void addToHashMap(double itemID, int isTrue)
@@ -70,13 +76,16 @@ public class SwipeActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * ---------------------------------------------------CLASS-------------------------------------------
+     */
     public class FetchFromAPI extends AsyncTask<String, Void, String>{
 
-        public int count=0;
+        public int count=1;
         public Item current_ten_items[];
         public static final String ENDPOINT = "http://api.walmartlabs.com/v1/search?query=";
         public static final String suffix = "&facet=on&apiKey=afxazgkdvur2tcmxf72b2s3k";
-        public static final String startstring = "&start>";
+        public static final String startstring = "&start=";
 
         /**
          *
@@ -95,6 +104,7 @@ public class SwipeActivity extends AppCompatActivity {
             while ((inputLine = res.readLine()) != null)
                 sBuffer.append(inputLine);
             res.close();
+            System.out.println("Made a call to the API!");
             return sBuffer.toString();
         }
 
@@ -128,16 +138,18 @@ public class SwipeActivity extends AppCompatActivity {
                 return null;
             }
 
-            Item[] items = new Item[10];
-            if(count%10==0)
+
+            if(count%10==1)
                 try {
                     String JString  = makeCallToAPI(params[0], count);
                     Gson gson = new Gson();
+                    System.out.println("count = " + count);
 
                     APICall obj = gson.fromJson(JString, APICall.class);
                     System.out.println("List updated");
                     current_ten_items = obj.items;
-    //            System.out.println(upc);
+
+
                 }
                 catch(Exception e)
                 {
@@ -153,30 +165,36 @@ public class SwipeActivity extends AppCompatActivity {
          * does blah
          */
 
-        protected void onPostExecute(String results){
+        protected void onPostExecute(final String query){
 
 
                 update_product();
                 count++;
 //                count = count% 10;
 
-            if(count%10==0)
-                try {
-                    String JString  = makeCallToAPI(results, count);
-                    Gson gson = new Gson();
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
 
-                    APICall obj = gson.fromJson(JString, APICall.class);
-                    System.out.println("List updated");
-                    current_ten_items = obj.items;
-                    //            System.out.println(upc);
-                }
-                catch(Exception e)
-                {
-                    System.out.println("error");
-                    e.printStackTrace();
+                    if(count%10==0)
+                    try {
+                        String q = query;
+                        String JString = makeCallToAPI(query, count);
+                        Gson gson = new Gson();
+
+                        APICall obj = gson.fromJson(JString, APICall.class);
+//                        System.out.println("List updated");
+//                        System.out.println("count: "+ count);
+                        current_ten_items = obj.items;
+
+                    } catch (Exception e) {
+                        // log error
+                    }
+                    return null;
                 }
 
-        }
+            }.execute();}
+
 
         private Bitmap bmp;
         private ImageView img;
@@ -185,9 +203,19 @@ public class SwipeActivity extends AppCompatActivity {
             final Item i = current_ten_items[count%10];
 
             TextView name = (TextView)findViewById(R.id.product_name);
+            if(i.name!=null)
+            if(i.name.length()>25)
+                i.name = i.name.substring(0,25) + "...";
+
             name.setText(i.name);
             TextView desc = (TextView)findViewById(R.id.product_desc);
-            desc.setText(i.shortDescription);
+            if(i.shortDescription!=null)
+                if(i.shortDescription.length()>=100)
+                desc.setText(i.shortDescription.substring(0, 100)+"...");
+                else
+                desc.setText(i.shortDescription);
+            else
+                desc.setText("No description");
 
 
             new AsyncTask<Void, Void, Void>() {
