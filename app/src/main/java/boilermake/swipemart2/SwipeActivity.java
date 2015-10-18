@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -21,13 +22,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class SwipeActivity extends AppCompatActivity {
 
-    static HashMap<Double, Integer> itemVotes;
+    static HashMap<String, Integer> itemVotes;
 
     ImageButton butt_up, butt_down;
+    Button butt_done;
 
     private String msg;
 
@@ -53,10 +57,10 @@ public class SwipeActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        itemVotes = new HashMap<Double, Integer>();
+        itemVotes = new HashMap<String, Integer>();
 
 
-        Intent intent = getIntent();
+        final Intent intent = getIntent();
         msg = intent.getStringExtra(SearchActivity.EXTRA_MESSAGE);
         Log.d("Received msg:", msg);
 
@@ -72,11 +76,33 @@ public class SwipeActivity extends AppCompatActivity {
 
         butt_up =  (ImageButton)findViewById(R.id.img_up);
         butt_down = (ImageButton)findViewById(R.id.img_down);
+        butt_done = (Button)findViewById(R.id.product_done);
+
+        butt_done.setVisibility(View.VISIBLE);
+        final Intent intent1 = new Intent(this, SelectActivity.class);
+
+        butt_done.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ArrayList<String> a= new ArrayList<String>();
+                for(Map.Entry<String, Integer> entry : itemVotes.entrySet()) {
+                    String key = entry.getKey();
+                    Integer value = entry.getValue();
+
+                    String obj = key + " " + value;
+                    a.add(obj);
+                }
+                intent1.putStringArrayListExtra("MAP_ARRAY_LIST", a);
+
+                startActivity(intent1);
+
+            }
+        });
 
         butt_up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                double id = task.current_ten_items[(task.count-2)%10].itemId;
+                String id = task.current_ten_items[(task.count-2)%10].itemId;
                 itemVotes.put(id, 1);
                 System.out.println(itemVotes);
                 task.onPostExecute(msg);
@@ -85,7 +111,7 @@ public class SwipeActivity extends AppCompatActivity {
         butt_down.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                double id = task.current_ten_items[(task.count-2)%10].itemId;
+                String id = task.current_ten_items[(task.count-2)%10].itemId;
                 itemVotes.put(id, 0);
                 System.out.println(itemVotes);
                 task.onPostExecute(msg);
@@ -93,7 +119,7 @@ public class SwipeActivity extends AppCompatActivity {
         });
     }
 
-    public static void addToHashMap(double itemID, int isTrue)
+    public static void addToHashMap(String itemID, int isTrue)
     {
         itemVotes.put(itemID, isTrue);
     }
@@ -274,7 +300,7 @@ public class SwipeActivity extends AppCompatActivity {
 
     class Item
     {
-        double itemId;
+        String itemId;
         String name;
         String categoryPath;
         String shortDescription;
@@ -302,6 +328,17 @@ public class SwipeActivity extends AppCompatActivity {
         int categoryId;
         String relevance;
         Item items[];
+    }
+
+    class MapClass
+    {
+        double ItemId;
+        int likedOrNot;
+
+        public MapClass(double itemId, int likedOrNot) {
+            ItemId = itemId;
+            this.likedOrNot = likedOrNot;
+        }
     }
 
 }

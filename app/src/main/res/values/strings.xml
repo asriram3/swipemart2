@@ -4,4 +4,6 @@
     <string name="title_activity_search">SearchActivity</string>
     <string name="title_activity_swipe">SwipeActivity</string>
     <string name="title_activity_main2">Main2Activity</string>
+    <string name="title_activity_select">SelectActivity</string>
+    <string name="title_activity_graph">GraphActivity</string>
 </resources>

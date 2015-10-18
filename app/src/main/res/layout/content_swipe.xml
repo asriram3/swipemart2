@@ -111,5 +111,13 @@
             android:layout_weight="0.7"
             android:gravity="center"
             android:textColor="#ffffff" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="I&apos;m Done!"
+            android:id="@+id/product_done"
+            android:background="#185db8"
+            android:visibility="invisible" />
     </LinearLayout>
 </RelativeLayout>
